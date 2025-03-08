@@ -1,4 +1,5 @@
 #include "ladder.h"
+#include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <unordered_map>
@@ -98,6 +99,7 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
                         string modified = last_word;
                         modified[i] = c;
                         one_off.push_back(modified);
+                        std::sort(one_off.begin(), one_off.end());
                     }
                 }
             }
