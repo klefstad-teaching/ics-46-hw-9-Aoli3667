@@ -85,12 +85,15 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
     {
         int level_size = ladder_q.size();
         unordered_set<string> level_visited;
+        vector<string> next_words;
 
         for (int i = 0; i < level_size; i++) 
         {
             vector<string> curr = ladder_q.front();
             ladder_q.pop();
             string last_word = curr.back();
+
+            vector<string> transformations;
 
             for (size_t j = 0; j < last_word.size(); ++j) 
             {
@@ -104,23 +107,14 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
                         continue;
                     }
                     
-                    last_word[j] = c;
+                    string modified = last_word;
+                    modified[j] = c;
 
-                    if (word_list_set.find(last_word) != word_list_set.end()) 
+                    if (word_list_set.find(modified) != word_list_set.end()) 
                     {
-                        vector<string> new_ladder = curr;
-                        new_ladder.push_back(last_word);
-
-                        if (last_word == end_word) 
-                        {
-                            return new_ladder;
-                        }
-
-                        ladder_q.push(new_ladder);
-                        level_visited.insert(last_word);
+                        transformations.push_back(modified);
                     }
                 }
-                last_word[j] = original_char; 
             }
 
             // Deletion
@@ -133,21 +127,12 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
 
                     if (word_list_set.find(deleted_word) != word_list_set.end()) 
                     {
-                        vector<string> new_ladder = curr;
-                        new_ladder.push_back(deleted_word);
-
-                        if (deleted_word == end_word) 
-                        {
-                            return new_ladder;
-                        }
-
-                        ladder_q.push(new_ladder);
-                        level_visited.insert(deleted_word);
+                        transformations.push_back(deleted_word);
                     }
                 }
             }
 
-            // Insertion
+            // Insertion 
             for (size_t j = 0; j <= last_word.size(); ++j) 
             {
                 for (char c = 'a'; c <= 'z'; ++c) 
@@ -157,18 +142,26 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
 
                     if (word_list_set.find(inserted_word) != word_list_set.end()) 
                     {
-                        vector<string> new_ladder = curr;
-                        new_ladder.push_back(inserted_word);
-
-                        if (inserted_word == end_word) 
-                        {
-                            return new_ladder;
-                        }
-
-                        ladder_q.push(new_ladder);
-                        level_visited.insert(inserted_word);
+                        transformations.push_back(inserted_word);
                     }
                 }
+            }
+
+            // Sort transformations
+            sort(transformations.begin(), transformations.end());
+
+            for (const string& word : transformations) 
+            {
+                vector<string> new_ladder = curr;
+                new_ladder.push_back(word);
+
+                if (word == end_word) 
+                {
+                    return new_ladder;
+                }
+
+                ladder_q.push(new_ladder);
+                level_visited.insert(word);
             }
         }
 
