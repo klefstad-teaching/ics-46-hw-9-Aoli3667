@@ -12,6 +12,8 @@ void verify_word_ladder_main()
     print_word_ladder(result);
     result = generate_word_ladder("work", "play", word_list);
     print_word_ladder(result);
+    result = generate_word_ladder("awake", "sleep", word_list);
+    print_word_ladder(result);
 }
 
 int main()
