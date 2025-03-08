@@ -69,76 +69,82 @@ bool is_adjacent(const string& word1, const string& word2)
 
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list)
 {
-    queue<vector<string>> ladder_q;
-    vector<string> result_vec;
-    if(begin_word == end_word) 
+    if (begin_word == end_word) 
     {
         error(begin_word, end_word, "Same begin and end");
         return {};
     }
+
     unordered_set<string> word_list_set(word_list.begin(), word_list.end());
-    //Compare the current word with one character off to see if in set, if yes then yes
     unordered_set<string> visited;
-    result_vec.push_back(begin_word);
-    ladder_q.push(result_vec);
+    queue<vector<string>> ladder_q;
+    
+    ladder_q.push({begin_word});
     visited.insert(begin_word);
 
-    while(!ladder_q.empty())
+    while (!ladder_q.empty()) 
     {
-        vector<string> curr = ladder_q.front();
-        ladder_q.pop();
-        string last_word = curr.back();
+        int level_size = ladder_q.size();
+        unordered_set<string> level_visited;
 
-        vector<string> one_off;
-        for(size_t i = 0; i < last_word.size(); ++i)
+        for (int i = 0; i < level_size; ++i) 
         {
-            string one;
-            for(char c = 'a'; c <= 'z'; ++c)
+            vector<string> curr = ladder_q.front();
+            ladder_q.pop();
+            string last_word = curr.back();
+
+            for (size_t i = 0; i <= last_word.size(); ++i) 
             {
-                //Case for a char diff
-                one = last_word;
-                one[i] = c;
-                one_off.push_back(one);
-                //Case for one more char
-                one = last_word;
-                one.insert(one.begin() + i, c);
-                one_off.push_back(one);
+                for (char c = 'a'; c <= 'z'; ++c) 
+                {
+                    // Change one character
+                    string mod_word = last_word;
+                    if (i < last_word.size()) 
+                    {
+                        mod_word[i] = c;
+                    }
+                    
+                    // Insert one character
+                    string insert_word = last_word;
+                    insert_word.insert(insert_word.begin() + i, c);
+
+                    // Remove one character
+                    if (i < last_word.size()) 
+                    {
+                        string erase_word = last_word;
+                        erase_word.erase(i, 1);
+                        
+                        if (word_list_set.count(erase_word) && !visited.count(erase_word)) 
+                        {
+                            vector<string> new_ladder = curr;
+                            new_ladder.push_back(erase_word);
+                            if (erase_word == end_word) return new_ladder;
+                            ladder_q.push(new_ladder);
+                            level_visited.insert(erase_word);
+                        }
+                    }
+
+                    for (string new_word : {mod_word, insert_word}) 
+                    {
+                        if (word_list_set.count(new_word) && !visited.count(new_word)) 
+                        {
+                            vector<string> new_ladder = curr;
+                            new_ladder.push_back(new_word);
+                            if (new_word == end_word) return new_ladder;
+                            ladder_q.push(new_ladder);
+                            level_visited.insert(new_word);
+                        }
+                    }
+                }
             }
-            //Case for one less char
-            one = last_word;
-            one.erase(i, 1);
-            one_off.push_back(one);
         }
 
-        for(string word : one_off)
-        {
-            if(word_list_set.find(word) != word_list_set.end() && visited.find(word) == visited.end())
-            {
-                visited.insert(word);
-                vector<string> new_ladder = curr;
-                new_ladder.push_back(word);
-                if(word == end_word)
-                    return new_ladder;
-                ladder_q.push(new_ladder);
-            }
-        }
-/*
-        for(string word : word_list)
-        {
-            if(visited.find(word) == visited.end() && is_adjacent(last_word, word))
-            {
-                visited.insert(word);
-                vector<string> new_ladder = curr;
-                new_ladder.push_back(word);
-                if(word == end_word)
-                    return new_ladder;
-                ladder_q.push(new_ladder);
-            }
-        }
-*/
+        visited.insert(level_visited.begin(), level_visited.end());
     }
+
     return {};
 }
+
 
 void load_words(set<string>& word_list, const string& file_name)
 {
