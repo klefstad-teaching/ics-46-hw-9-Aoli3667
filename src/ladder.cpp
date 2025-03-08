@@ -77,18 +77,21 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
     ladder_q.push({begin_word});
     visited.insert(begin_word);
 
-    while (!ladder_q.empty()) {
+    while (!ladder_q.empty()) 
+    {
         int level_size = ladder_q.size();
         unordered_set<string> level_visited;
 
-        for (int i = 0; i < level_size; i++) {
+        for (int i = 0; i < level_size; i++) 
+        {
             vector<string> curr = ladder_q.front();
             ladder_q.pop();
             string last_word = curr.back();
 
             vector<string> one_off;
 
-            for (size_t i = 0; i < last_word.size(); ++i) {
+            for (size_t i = 0; i < last_word.size(); ++i) 
+            {
                 //one off
                 for (char c = 'a'; c <= 'z'; ++c) {
                     if (c != last_word[i]) {
@@ -97,6 +100,10 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
                         one_off.push_back(modified);
                     }
                 }
+            }
+
+            for (size_t i = 0; i < last_word.size(); ++i)
+            {
                 // Deletion
                 if (last_word.size() > 1) {
                     string deleted = last_word;
@@ -104,8 +111,10 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
                     one_off.push_back(deleted);
                 }
             }
+
             // Insertion
-            for (size_t i = 0; i <= last_word.size(); ++i) {
+            for (size_t i = 0; i <= last_word.size(); ++i) 
+            {
                 for (char c = 'a'; c <= 'z'; ++c) {
                     string inserted = last_word;
                     inserted.insert(inserted.begin() + i, c);
@@ -113,12 +122,15 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
                 }
             }
 
-            for (const string& word : one_off) {
-                if (word_list_set.find(word) != word_list_set.end() && visited.find(word) == visited.end()) {
+            for (const string& word : one_off) 
+            {
+                if (word_list_set.find(word) != word_list_set.end() && visited.find(word) == visited.end()) 
+                {
                     vector<string> new_ladder = curr;
                     new_ladder.push_back(word);
 
-                    if (word == end_word) return new_ladder;
+                    if (word == end_word) 
+                        return new_ladder;
 
                     ladder_q.push(new_ladder);
                     level_visited.insert(word);
