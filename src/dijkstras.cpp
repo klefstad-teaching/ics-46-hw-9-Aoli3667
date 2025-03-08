@@ -1,4 +1,5 @@
 #include "dijkstras.h"
+#include <algorithm>
 #include <queue>
 #include <vector>
 
@@ -47,12 +48,19 @@ vector<int> extract_shortest_path(const vector<int>& distances, const vector<int
     {
         path.push_back(at);
     }
+    std::reverse(path.begin(), path.end());
     return path;
 }
 
 void print_path(const vector<int>& v, int total)
 {
+    /*
     for (int i = (int)v.size() - 1; i >= 0; i--) 
+    {
+        cout << v[i] << " ";
+    }
+    */
+    for(int i = 0; i < (int)v.size(); i++)
     {
         cout << v[i] << " ";
     }

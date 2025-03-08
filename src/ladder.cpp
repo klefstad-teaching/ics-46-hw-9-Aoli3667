@@ -1,7 +1,7 @@
 #include "ladder.h"
 #include <cstddef>
 #include <cstdlib>
-#include <iterator>
+#include <unordered_set>
 
 void error(string word1, string word2, string msg)
 {
@@ -10,16 +10,61 @@ void error(string word1, string word2, string msg)
 
 bool edit_distance_within(const std::string& str1, const std::string& str2, int d)
 {
+    int diff = 0;
     if(std::abs((int)(str1.size() - str2.size())) > d) 
         return false;
+    if(str1 == str2)
+        return true;
+    size_t len1 = str1.size();
+    size_t len2 = str2.size();
+    if(len1 == len2)
+    {
+        for (size_t i = 0; i < len1; ++i) {
+            if (str1[i] != str2[i]) 
+            {
+                ++diff;
+                if (diff > d)
+                    return false;
+            }
+        }
+        return diff == d;
+    }
+    //diff length case
+    else
+    {
+        const std::string& longer = (len1 > len2) ? str1 : str2;
+        const std::string& shorter = (len1 < len2) ? str1 : str2;
+
+        size_t i = 0, j = 0;
+        bool diff_found = false;
+    
+        while (i < longer.size() && j < shorter.size()) 
+        {
+            if (longer[i] != shorter[j]) 
+            {
+                if (diff_found) 
+                    return false; 
+                if(diff > d)
+                    diff_found = true;
+                ++diff;
+                ++i;
+            } 
+            else 
+            {
+                ++i;
+                ++j;
+            }
+        }
+    }
     return true;
 }
 
 bool is_adjacent(const string& word1, const string& word2)
 {
+    /*
     int diff = 0;
     if(word1 == word2)
-        return false;
+        return true;
     if(!edit_distance_within(word1, word2, 1)) 
         return false;
 
@@ -64,6 +109,8 @@ bool is_adjacent(const string& word1, const string& word2)
         }
     }
     return true;
+    */
+    return edit_distance_within(word1, word2, 1);
 }
 
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list)
@@ -75,7 +122,7 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
         error(begin_word, end_word, "Same begin and end");
         return {};
     }
-    set<string> visited;
+    unordered_set<string> visited;
     result_vec.push_back(begin_word);
     ladder_q.push(result_vec);
     visited.insert(begin_word);
@@ -117,11 +164,12 @@ void print_word_ladder(const vector<string>& ladder)
         cout << "No word ladder found." << endl;
         return;
     }
-
+    cout << "Word ladder found: ";
     for(string word : ladder)
     {
         cout << word << " ";
     }
+    cout << endl;
 }
 
 #define my_assert(e) {cout << #e << ((e) ? " passed": " failed") << endl;}
