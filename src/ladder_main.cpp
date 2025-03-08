@@ -20,4 +20,5 @@ int main()
     print_word_ladder(result);
     cout << "finish" << endl;
     verify_word_ladder_main();
+    verify_word_ladder();
 }
