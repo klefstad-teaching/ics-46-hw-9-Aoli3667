@@ -68,15 +68,18 @@ bool is_adjacent(const string& word1, const string& word2)
     return edit_distance_within(word1, word2, 1);
 }
 
-vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list) {
+vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list) 
+{
     queue<vector<string>> ladder_q;
     unordered_set<string> word_list_set(word_list.begin(), word_list.end());
-    unordered_set<string> visited;
-
-    if (begin_word == end_word) return {};
+    
+    if (begin_word == end_word) 
+    {
+        return {};
+    }
 
     ladder_q.push({begin_word});
-    visited.insert(begin_word);
+    word_list_set.erase(begin_word);  
 
     while (!ladder_q.empty()) 
     {
@@ -89,60 +92,96 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
             ladder_q.pop();
             string last_word = curr.back();
 
-            vector<string> one_off;
-
-            for (size_t i = 0; i < last_word.size(); ++i) 
+            for (size_t j = 0; j < last_word.size(); ++j) 
             {
-                //one off
-                for (char c = 'a'; c <= 'z'; ++c) {
-                    if (c != last_word[i]) {
-                        string modified = last_word;
-                        modified[i] = c;
-                        one_off.push_back(modified);
-                        std::sort(one_off.begin(), one_off.end());
+                char original_char = last_word[j];
+
+                // One-off 
+                for (char c = 'a'; c <= 'z'; ++c) 
+                {
+                    if (c == original_char) 
+                    {
+                        continue;
+                    }
+                    
+                    last_word[j] = c;
+
+                    if (word_list_set.find(last_word) != word_list_set.end()) 
+                    {
+                        vector<string> new_ladder = curr;
+                        new_ladder.push_back(last_word);
+
+                        if (last_word == end_word) 
+                        {
+                            return new_ladder;
+                        }
+
+                        ladder_q.push(new_ladder);
+                        level_visited.insert(last_word);
+                    }
+                }
+                last_word[j] = original_char; 
+            }
+
+            // Deletion
+            if (last_word.size() > 1) 
+            {
+                for (size_t j = 0; j < last_word.size(); ++j) 
+                {
+                    string deleted_word = last_word;
+                    deleted_word.erase(j, 1);
+
+                    if (word_list_set.find(deleted_word) != word_list_set.end()) 
+                    {
+                        vector<string> new_ladder = curr;
+                        new_ladder.push_back(deleted_word);
+
+                        if (deleted_word == end_word) 
+                        {
+                            return new_ladder;
+                        }
+
+                        ladder_q.push(new_ladder);
+                        level_visited.insert(deleted_word);
                     }
                 }
             }
 
-            for (size_t i = 0; i < last_word.size(); ++i)
-            {
-                // Deletion
-                if (last_word.size() > 1) {
-                    string deleted = last_word;
-                    deleted.erase(i, 1);
-                    one_off.push_back(deleted);
-                }
-            }
-
             // Insertion
-            for (size_t i = 0; i <= last_word.size(); ++i) 
+            for (size_t j = 0; j <= last_word.size(); ++j) 
             {
-                for (char c = 'a'; c <= 'z'; ++c) {
-                    string inserted = last_word;
-                    inserted.insert(inserted.begin() + i, c);
-                    one_off.push_back(inserted);
-                }
-            }
-
-            for (const string& word : one_off) 
-            {
-                if (word_list_set.find(word) != word_list_set.end() && visited.find(word) == visited.end()) 
+                for (char c = 'a'; c <= 'z'; ++c) 
                 {
-                    vector<string> new_ladder = curr;
-                    new_ladder.push_back(word);
+                    string inserted_word = last_word;
+                    inserted_word.insert(inserted_word.begin() + j, c);
 
-                    if (word == end_word) 
-                        return new_ladder;
+                    if (word_list_set.find(inserted_word) != word_list_set.end()) 
+                    {
+                        vector<string> new_ladder = curr;
+                        new_ladder.push_back(inserted_word);
 
-                    ladder_q.push(new_ladder);
-                    level_visited.insert(word);
+                        if (inserted_word == end_word) 
+                        {
+                            return new_ladder;
+                        }
+
+                        ladder_q.push(new_ladder);
+                        level_visited.insert(inserted_word);
+                    }
                 }
             }
         }
-        for (const string& word : level_visited) visited.insert(word);
+
+        for (const string& word : level_visited) 
+        {
+            word_list_set.erase(word);
+        }
     }
+    
     return {};
 }
+
+
 
 
 void load_words(set<string>& word_list, const string& file_name)
