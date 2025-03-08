@@ -1,7 +1,9 @@
 #include "ladder.h"
 #include <cstddef>
 #include <cstdlib>
+#include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 void error(string word1, string word2, string msg)
 {
@@ -19,7 +21,8 @@ bool edit_distance_within(const std::string& str1, const std::string& str2, int 
     size_t len2 = str2.size();
     if(len1 == len2)
     {
-        for (size_t i = 0; i < len1; ++i) {
+        for (size_t i = 0; i < len1; ++i) 
+        {
             if (str1[i] != str2[i]) 
             {
                 ++diff;
@@ -44,7 +47,7 @@ bool edit_distance_within(const std::string& str1, const std::string& str2, int 
             {
                 if (diff_found) 
                     return false; 
-                if(diff > d)
+                if(diff >= d)
                     diff_found = true;
                 ++diff;
                 ++i;
@@ -61,55 +64,6 @@ bool edit_distance_within(const std::string& str1, const std::string& str2, int 
 
 bool is_adjacent(const string& word1, const string& word2)
 {
-    /*
-    int diff = 0;
-    if(word1 == word2)
-        return true;
-    if(!edit_distance_within(word1, word2, 1)) 
-        return false;
-
-    size_t len1 = word1.size();
-    size_t len2 = word2.size();
-    //Same length case
-    if(len1 == len2)
-    {
-        for (size_t i = 0; i < len1; ++i) {
-            if (word1[i] != word2[i]) 
-            {
-                ++diff;
-                if (diff > 1)
-                    return false;
-            }
-        }
-        return diff == 1;
-    }
-    //diff length case
-    else
-    {
-        const std::string& longer = (len1 > len2) ? word1 : word2;
-        const std::string& shorter = (len1 < len2) ? word1 : word2;
-
-        size_t i = 0, j = 0;
-        bool diff_found = false;
-    
-        while (i < longer.size() && j < shorter.size()) 
-        {
-            if (longer[i] != shorter[j]) 
-            {
-                if (diff_found) 
-                    return false; 
-                diff_found = true;
-                ++i;
-            } 
-            else 
-            {
-                ++i;
-                ++j;
-            }
-        }
-    }
-    return true;
-    */
     return edit_distance_within(word1, word2, 1);
 }
 
@@ -122,6 +76,8 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
         error(begin_word, end_word, "Same begin and end");
         return {};
     }
+    unordered_set<string> word_list_set(word_list.begin(), word_list.end());
+    //Compare the current word with one character off to see if in set, if yes then yes
     unordered_set<string> visited;
     result_vec.push_back(begin_word);
     ladder_q.push(result_vec);
@@ -132,6 +88,41 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
         vector<string> curr = ladder_q.front();
         ladder_q.pop();
         string last_word = curr.back();
+
+        vector<string> one_off;
+        for(size_t i = 0; i < last_word.size(); ++i)
+        {
+            string one;
+            for(char c = 'a'; c <= 'z'; ++c)
+            {
+                //Case for a char diff
+                one = last_word;
+                one[i] = c;
+                one_off.push_back(one);
+                //Case for one more char
+                one = last_word;
+                one.insert(one.begin() + i, c);
+                one_off.push_back(one);
+            }
+            //Case for one less char
+            one = last_word;
+            one.erase(i, 1);
+            one_off.push_back(one);
+        }
+
+        for(string word : one_off)
+        {
+            if(word_list_set.find(word) != word_list_set.end() && visited.find(word) == visited.end())
+            {
+                visited.insert(word);
+                vector<string> new_ladder = curr;
+                new_ladder.push_back(word);
+                if(word == end_word)
+                    return new_ladder;
+                ladder_q.push(new_ladder);
+            }
+        }
+/*
         for(string word : word_list)
         {
             if(visited.find(word) == visited.end() && is_adjacent(last_word, word))
@@ -144,6 +135,7 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
                 ladder_q.push(new_ladder);
             }
         }
+*/
     }
     return {};
 }
