@@ -1,4 +1,5 @@
 #include "ladder.h"
+#include <cstddef>
 #include <cstdlib>
 #include <iterator>
 
@@ -21,21 +22,48 @@ bool is_adjacent(const string& word1, const string& word2)
         return false;
     if(!edit_distance_within(word1, word2, 1)) 
         return false;
-    else
+
+    size_t len1 = word1.size();
+    size_t len2 = word2.size();
+    //Same length case
+    if(len1 == len2)
     {
-        for(size_t i = 0, j = 0; i < word1.size() && j < word2.size(); i++, j++)
-        {
-            if(word1[i] != word2[j]) 
+        for (size_t i = 0; i < len1; ++i) {
+            if (word1[i] != word2[i]) 
             {
                 ++diff;
-                if(word1.size() > word2.size()) i++;
-                else if (word2.size() > word1.size()) j++;
+                if (diff > 1)
+                    return false;
             }
-            if(diff > 1) 
-                return false;
+        }
+        return diff == 1;
+    }
+    //diff length case
+    else
+    {
+        const std::string& longer = (len1 > len2) ? word1 : word2;
+        const std::string& shorter = (len1 < len2) ? word1 : word2;
+
+        size_t i = 0, j = 0;
+        bool diff_found = false;
+    
+        while (i < longer.size() && j < shorter.size()) 
+        {
+            if (longer[i] != shorter[j]) 
+            {
+                if (diff_found) 
+                    return false; 
+                diff_found = true;
+                ++i;
+            } 
+            else 
+            {
+                ++i;
+                ++j;
+            }
         }
     }
-    return (diff == 1 || (diff == 0 && word1.size() != word2.size()));
+    return true;
 }
 
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list)
